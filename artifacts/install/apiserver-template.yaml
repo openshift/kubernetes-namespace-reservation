@@ -1,0 +1,78 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: namespace-reservation-server
+parameters:
+- name: IMAGE
+  value: namespace-reservation-server:latest
+- name: NAMESPACE
+  value: openshift-namespace-reservation
+- name: LOGLEVEL
+  value: "0"
+objects:
+
+# to create the tsb server
+- apiVersion: extensions/v1beta1
+  kind: DaemonSet
+  metadata:
+    namespace: ${NAMESPACE}
+    name: server
+    labels:
+      server: "true"
+  spec:
+    template:
+      metadata:
+        name: server
+        labels:
+          server: "true"
+      spec:
+        serviceAccountName: server
+        containers:
+        - name: c
+          image: ${IMAGE}
+          imagePullPolicy: IfNotPresent
+          command:
+          - "/usr/bin/namespace-reservation-server"
+          - "--secure-port=8443"
+          - "--audit-log-path=-"
+          - "--tls-cert-file=/var/serving-cert/tls.crt"
+          - "--tls-private-key-file=/var/serving-cert/tls.key"
+          - "--v=${LOGLEVEL}"
+          ports:
+          - containerPort: 8443
+          volumeMounts:
+          - mountPath: /var/serving-cert
+            name: serving-cert
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8443
+              scheme: HTTPS
+        volumes:
+        - name: serving-cert
+          secret:
+            defaultMode: 420
+            secretName: server-serving-cert
+
+# to be able to assign powers to the process
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    namespace: ${NAMESPACE}
+    name: server
+
+# to be able to expose TSB inside the cluster
+- apiVersion: v1
+  kind: Service
+  metadata:
+    namespace: ${NAMESPACE}
+    name: server
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: server-serving-cert
+  spec:
+    selector:
+      server: "true"
+    ports:
+    - port: 443
+      targetPort: 8443
+
