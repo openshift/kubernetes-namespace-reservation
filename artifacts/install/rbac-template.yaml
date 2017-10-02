@@ -1,0 +1,51 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: namespace-reservation-rbac
+parameters:
+- name: NAMESPACE
+  value: openshift-namespace-reservation
+- name: KUBE_SYSTEM
+  value: kube-system
+objects:
+
+# to delegate authentication and authorization
+- apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: ClusterRoleBinding
+  metadata:
+    name: auth-delegator-${NAMESPACE}
+  roleRef:
+    kind: ClusterRole
+    name: system:auth-delegator
+  subjects:
+  - kind: ServiceAccount
+    namespace: ${NAMESPACE}
+    name: server
+
+# to have the template service broker powers
+- apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: ClusterRoleBinding
+  metadata:
+    name: tsb-${NAMESPACE}
+  roleRef:
+    kind: ClusterRole
+    name: system:openshift:online:namespace-reservation-server
+  subjects:
+  - kind: ServiceAccount
+    namespace: ${NAMESPACE}
+    name: server
+
+# to read the config for terminating authentication
+- apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: RoleBinding
+  metadata:
+    namespace: ${KUBE_SYSTEM}
+    name: extension-server-authentication-reader-${NAMESPACE}
+  roleRef:
+    kind: Role
+    name: extension-apiserver-authentication-reader
+  subjects:
+  - kind: ServiceAccount
+    namespace: ${NAMESPACE}
+    name: server
+
