@@ -31,6 +31,7 @@ func NewNamespaceReservationServerOptions(out, errOut io.Writer) *NamespaceReser
 		StdOut: out,
 		StdErr: errOut,
 	}
+	o.RecommendedOptions.Etcd = nil
 
 	return o
 }
