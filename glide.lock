@@ -1,5 +1,5 @@
 hash: 6744c1c72ea6c72ebc65ad4296a114a5cf22d18bae9f72b8e446cb15979aac8b
-updated: 2017-09-20T11:22:07.176974382-04:00
+updated: 2017-10-13T09:03:22.474745223-04:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -199,15 +199,15 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/cobra
-  version: b78744579491c1ceeaaa3b40205e56b0591b93a3
+  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - name: github.com/spf13/pflag
-  version: 7aff26db30c1be810f9de5038ec5ef96ac41fd7c
+  version: a9789e855c7696159b7db0db7f440b449edf2b31
 - name: github.com/ugorji/go
   version: ded73eae5db7e7a0ef6f55aace87a2873c5d2b74
   subpackages:
   - codec
 - name: golang.org/x/crypto
-  version: d172538b2cfce0c13cee31e647d0367aa8cd2486
+  version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
   - bcrypt
   - blowfish
@@ -229,9 +229,10 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/sys
-  version: 7a4fde3fda8ef580a89dbae8138c26041be14299
+  version: 7ddbeae9ae08c6a06a59597f0c9edbc5ff2444ce
   subpackages:
   - unix
+  - windows
 - name: golang.org/x/text
   version: b19bf474d317b857955b12035d2c5acb57ce8b01
   subpackages:
@@ -273,7 +274,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
-  version: 0b011bb8613011ab0909c6a759d9d811dc21a156
+  version: 81aa34336d28aadc3a8e8da7dfd9258c5157e5e4
   subpackages:
   - admission/v1alpha1
   - admissionregistration/v1alpha1
@@ -301,7 +302,7 @@ imports:
   - storage/v1
   - storage/v1beta1
 - name: k8s.io/apimachinery
-  version: 1168e538ea3ccf444854d1fdd5681d2d876680a7
+  version: 3b05bbfa0a45413bfa184edbf9af617e277962fb
   subpackages:
   - pkg/api/equality
   - pkg/api/errors
@@ -358,7 +359,7 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 19667a1afc13cc13930c40a20f2c12bbdcaaa246
+  version: c1e53d745d0fe45bf7d5d44697e6eface25fceca
   subpackages:
   - pkg/admission
   - pkg/admission/initializer
@@ -433,7 +434,7 @@ imports:
   - plugin/pkg/authenticator/token/webhook
   - plugin/pkg/authorizer/webhook
 - name: k8s.io/client-go
-  version: c6f8cf2c47d21d55fa0df928291b2580544886c8
+  version: 82aa063804cf055e16e8911250f888bc216e8b61
   subpackages:
   - discovery
   - informers
@@ -535,9 +536,9 @@ imports:
   - util/homedir
   - util/integer
 - name: k8s.io/code-generator
-  version: 7ab2c9f35b06d8d9f672ee64580e534d2ab5d27e
+  version: 77491151d5f87cdc19d40f5746b4d90f8d20f180
 - name: k8s.io/gengo
-  version: 75356185a9af8f0464efa792e2e9508d5b4be83c
+  version: 70ad626ed2d7a483d89d2c4c56364d60b48ee8fc
 - name: k8s.io/kube-openapi
   version: abfc5fbe1cf87ee697db107fdfd24c32fe4397a8
   subpackages:
