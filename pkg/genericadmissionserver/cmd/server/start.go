@@ -11,7 +11,7 @@ import (
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
 
-	"github.com/openshift/kubernetes-namespace-reservation/pkg/apiserver"
+	"github.com/openshift/kubernetes-namespace-reservation/pkg/genericadmissionserver/apiserver"
 )
 
 const defaultEtcdPathPrefix = "/registry/online.openshift.io"
@@ -19,14 +19,18 @@ const defaultEtcdPathPrefix = "/registry/online.openshift.io"
 type NamespaceReservationServerOptions struct {
 	RecommendedOptions *genericoptions.RecommendedOptions
 
+	AdmissionHooks []apiserver.AdmissionHook
+
 	StdOut io.Writer
 	StdErr io.Writer
 }
 
-func NewNamespaceReservationServerOptions(out, errOut io.Writer) *NamespaceReservationServerOptions {
+func NewNamespaceReservationServerOptions(out, errOut io.Writer, admissionHooks ...apiserver.AdmissionHook) *NamespaceReservationServerOptions {
 	o := &NamespaceReservationServerOptions{
 		// TODO we will nil out the etcd storage options.  This requires a later level of k8s.io/apiserver
 		RecommendedOptions: genericoptions.NewRecommendedOptions(defaultEtcdPathPrefix, apiserver.Scheme, apiserver.Codecs.LegacyCodec(admissionv1alpha1.SchemeGroupVersion)),
+
+		AdmissionHooks: admissionHooks,
 
 		StdOut: out,
 		StdErr: errOut,
@@ -37,8 +41,8 @@ func NewNamespaceReservationServerOptions(out, errOut io.Writer) *NamespaceReser
 }
 
 // NewCommandStartMaster provides a CLI handler for 'start master' command
-func NewCommandStartNamespaceReservationServer(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {
-	o := NewNamespaceReservationServerOptions(out, errOut)
+func NewCommandStartNamespaceReservationServer(out, errOut io.Writer, stopCh <-chan struct{}, admissionHooks ...apiserver.AdmissionHook) *cobra.Command {
+	o := NewNamespaceReservationServerOptions(out, errOut, admissionHooks...)
 
 	cmd := &cobra.Command{
 		Short: "Launch a namespace reservation API server",
@@ -84,6 +88,9 @@ func (o NamespaceReservationServerOptions) Config() (*apiserver.Config, error) {
 
 	config := &apiserver.Config{
 		GenericConfig: serverConfig,
+		ExtraConfig: apiserver.ExtraConfig{
+			AdmissionHooks: o.AdmissionHooks,
+		},
 	}
 	return config, nil
 }
