@@ -7,6 +7,7 @@ parameters:
   value: namespace-reservation-server:latest
 - name: NAMESPACE
   value: openshift-namespace-reservation
+- name: SERVICE_SERVING_CERT_CA
 - name: LOGLEVEL
   value: "0"
 objects:
@@ -96,3 +97,26 @@ objects:
       singular: namespacereservation
       # kind is normally the CamelCased singular type. Your resource manifests use this.
       kind: NamespaceReservation
+
+# register to intercept projectrequest creates
+- apiVersion: admissionregistration.k8s.io/v1alpha1
+  kind: ExternalAdmissionHookConfiguration
+  metadata:
+    name: namespacereservations.admission.online.openshift.io
+  externalAdmissionHooks:
+  - name: namespacereservations.admission.online.openshift.io/apis/admission.online.openshift.io/v1alpha1/namespacereservations
+    clientConfig:
+      service:
+        namespace: ${NAMESPACE}
+        name: server
+      caBundle: ${SERVICE_SERVING_CERT_CA}
+    rules:
+    - operations:
+      - CREATE
+      apiGroups:
+      - project.openshift.io
+      apiVersions:
+      - "*"
+      resources:
+      - projectrequests
+    failurePolicy: Fail

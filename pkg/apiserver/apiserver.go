@@ -17,7 +17,12 @@ limitations under the License.
 package apiserver
 
 import (
+	"fmt"
+
+	"github.com/openshift/kubernetes-namespace-reservation/pkg/registry/admissionreview"
 	admissionv1alpha1 "k8s.io/api/admission/v1alpha1"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/apimachinery"
 	"k8s.io/apimachinery/pkg/apimachinery/announced"
 	"k8s.io/apimachinery/pkg/apimachinery/registered"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,6 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/version"
+	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 )
 
@@ -33,6 +39,9 @@ var (
 	registry             = registered.NewOrDie("")
 	Scheme               = runtime.NewScheme()
 	Codecs               = serializer.NewCodecFactory(Scheme)
+
+	AdmissionGroupName           = "admission.online.openshift.io"
+	AdmissionsSchemeGroupVersion = schema.GroupVersion{Group: AdmissionGroupName, Version: "v1alpha1"}
 )
 
 func init() {
@@ -102,16 +111,57 @@ func (c completedConfig) New() (*NamespaceReservationServer, error) {
 		GenericAPIServer: genericServer,
 	}
 
+	accessor := meta.NewAccessor()
+	versionInterfaces := &meta.VersionInterfaces{
+		ObjectConvertor:  Scheme,
+		MetadataAccessor: accessor,
+	}
+	interfacesFor := func(version schema.GroupVersion) (*meta.VersionInterfaces, error) {
+		if version != admissionv1alpha1.SchemeGroupVersion {
+			return nil, fmt.Errorf("unexpected version %v", version)
+		}
+		return versionInterfaces, nil
+	}
+	restMapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{admissionv1alpha1.SchemeGroupVersion}, interfacesFor)
+	restMapper.AddSpecific(
+		admissionv1alpha1.SchemeGroupVersion.WithKind("AdmissionReview"),
+		AdmissionsSchemeGroupVersion.WithResource("namespacereservations"),
+		AdmissionsSchemeGroupVersion.WithResource("namespacereservation"),
+		meta.RESTScopeRoot)
+
+	admissionReview := admissionreview.NewREST()
 	// TODO we're going to need a later k8s.io/apiserver so that we can get discovery to list a different group version for
 	// our endpoint which we'll use to back some custom storage which will consume the AdmissionReview type and give back the correct response
-	//apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(wardle.GroupName, registry, Scheme, metav1.ParameterCodec, Codecs)
-	//apiGroupInfo.GroupMeta.GroupVersion = v1alpha1.SchemeGroupVersion
-	//v1alpha1storage := map[string]rest.Storage{}
-	//apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
-	//
-	//if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
-	//	return nil, err
-	//}
+	apiGroupInfo := genericapiserver.APIGroupInfo{
+		GroupMeta: apimachinery.GroupMeta{
+			GroupVersion:  AdmissionsSchemeGroupVersion,
+			GroupVersions: []schema.GroupVersion{AdmissionsSchemeGroupVersion},
+			SelfLinker:    runtime.SelfLinker(accessor),
+			RESTMapper:    restMapper,
+			InterfacesFor: interfacesFor,
+			InterfacesByVersion: map[schema.GroupVersion]*meta.VersionInterfaces{
+				admissionv1alpha1.SchemeGroupVersion: versionInterfaces,
+			},
+		},
+		VersionedResourcesStorageMap: map[string]map[string]rest.Storage{},
+		// TODO unhardcode this.  It was hardcoded before, but we need to re-evaluate
+		OptionsExternalVersion: &schema.GroupVersion{Version: "v1"},
+		Scheme:                 Scheme,
+		ParameterCodec:         metav1.ParameterCodec,
+		NegotiatedSerializer:   Codecs,
+		SubresourceGroupVersionKind: map[string]schema.GroupVersionKind{
+			"namespacereservations": admissionv1alpha1.SchemeGroupVersion.WithKind("AdmissionReview"),
+		},
+	}
+	apiGroupInfo.GroupMeta.GroupVersion = AdmissionsSchemeGroupVersion
+	v1alpha1storage := map[string]rest.Storage{
+		"namespacereservations": admissionReview,
+	}
+	apiGroupInfo.VersionedResourcesStorageMap[AdmissionsSchemeGroupVersion.Version] = v1alpha1storage
+
+	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
+		return nil, err
+	}
 
 	return s, nil
 }
