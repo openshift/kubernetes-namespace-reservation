@@ -14,7 +14,7 @@ import (
 
 	"sync"
 
-	"github.com/openshift/kubernetes-namespace-reservation/pkg/genericadmissionserver/cmd"
+	"github.com/openshift/generic-admission-server/pkg/cmd"
 )
 
 func main() {
