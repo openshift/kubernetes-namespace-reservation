@@ -1,5 +1,5 @@
-hash: 6744c1c72ea6c72ebc65ad4296a114a5cf22d18bae9f72b8e446cb15979aac8b
-updated: 2017-10-13T09:03:22.474745223-04:00
+hash: f686326d982f5aaceb2fd784da4b0f858bfbb708431380572f942a65aa7e01d2
+updated: 2017-10-17T15:58:28.511321351-04:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -99,9 +99,9 @@ imports:
 - name: github.com/go-openapi/jsonreference
   version: 13c6e3589ad90f49bd3e3bbe2c2cb3d7a4142272
 - name: github.com/go-openapi/spec
-  version: 6aced65f8501fe1217321abf0749d354824ba2ff
+  version: 7abd5745472fff5eb3685386d5fb8bf38683154d
 - name: github.com/go-openapi/swag
-  version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
+  version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
 - name: github.com/gogo/protobuf
   version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
   subpackages:
@@ -155,7 +155,7 @@ imports:
 - name: github.com/juju/ratelimit
   version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
 - name: github.com/mailru/easyjson
-  version: d5b7844b561a7bc640052f1b935f7b800330d7e0
+  version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
   subpackages:
   - buffer
   - jlexer
@@ -170,6 +170,13 @@ imports:
   - flowrate
 - name: github.com/NYTimes/gziphandler
   version: 56545f4a5d46df9a6648819d1664c3a03a13ffdb
+- name: github.com/openshift/generic-admission-server
+  version: f5a8b25f1facd398a01e57bae218355704caea45
+  subpackages:
+  - pkg/apiserver
+  - pkg/cmd
+  - pkg/cmd/server
+  - pkg/registry/admissionreview
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/peterbourgon/diskv
@@ -201,7 +208,7 @@ imports:
 - name: github.com/spf13/cobra
   version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - name: github.com/spf13/pflag
-  version: a9789e855c7696159b7db0db7f440b449edf2b31
+  version: 1f33b80956cde38911d1f23d764deb8d77a649ce
 - name: github.com/ugorji/go
   version: ded73eae5db7e7a0ef6f55aace87a2873c5d2b74
   subpackages:
@@ -209,11 +216,6 @@ imports:
 - name: golang.org/x/crypto
   version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
-  - bcrypt
-  - blowfish
-  - nacl/secretbox
-  - poly1305
-  - salsa20/salsa
   - ssh/terminal
 - name: golang.org/x/net
   version: 1c05540f6879653db88113bc4a2b70aec4bd491f
@@ -274,10 +276,11 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
-  version: 81aa34336d28aadc3a8e8da7dfd9258c5157e5e4
+  version: 409c3b2393cd3359f275bd8b883b4d9c5aec41f6
   subpackages:
   - admission/v1alpha1
   - admissionregistration/v1alpha1
+  - apps/v1
   - apps/v1beta1
   - apps/v1beta2
   - authentication/v1
@@ -302,7 +305,7 @@ imports:
   - storage/v1
   - storage/v1beta1
 - name: k8s.io/apimachinery
-  version: 3b05bbfa0a45413bfa184edbf9af617e277962fb
+  version: e9a29eff7d472df0f7da9ead5ab59b74e74a07ec
   subpackages:
   - pkg/api/equality
   - pkg/api/errors
@@ -359,10 +362,12 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: c1e53d745d0fe45bf7d5d44697e6eface25fceca
+  version: d299c880c4e33854f8c45bdd7ab599fb54cbe575
   subpackages:
   - pkg/admission
+  - pkg/admission/configuration
   - pkg/admission/initializer
+  - pkg/admission/plugin/initialization
   - pkg/admission/plugin/namespace/lifecycle
   - pkg/apis/apiserver
   - pkg/apis/apiserver/install
@@ -434,13 +439,15 @@ imports:
   - plugin/pkg/authenticator/token/webhook
   - plugin/pkg/authorizer/webhook
 - name: k8s.io/client-go
-  version: 82aa063804cf055e16e8911250f888bc216e8b61
+  version: 076e344c86e52f088b78615f815b245f6d613537
   subpackages:
   - discovery
+  - dynamic
   - informers
   - informers/admissionregistration
   - informers/admissionregistration/v1alpha1
   - informers/apps
+  - informers/apps/v1
   - informers/apps/v1beta1
   - informers/apps/v1beta2
   - informers/autoscaling
@@ -475,6 +482,7 @@ imports:
   - kubernetes
   - kubernetes/scheme
   - kubernetes/typed/admissionregistration/v1alpha1
+  - kubernetes/typed/apps/v1
   - kubernetes/typed/apps/v1beta1
   - kubernetes/typed/apps/v1beta2
   - kubernetes/typed/authentication/v1
@@ -499,6 +507,7 @@ imports:
   - kubernetes/typed/storage/v1
   - kubernetes/typed/storage/v1beta1
   - listers/admissionregistration/v1alpha1
+  - listers/apps/v1
   - listers/apps/v1beta1
   - listers/apps/v1beta2
   - listers/autoscaling/v1
@@ -531,14 +540,11 @@ imports:
   - tools/pager
   - tools/reference
   - transport
+  - util/buffer
   - util/cert
   - util/flowcontrol
   - util/homedir
   - util/integer
-- name: k8s.io/code-generator
-  version: 77491151d5f87cdc19d40f5746b4d90f8d20f180
-- name: k8s.io/gengo
-  version: 70ad626ed2d7a483d89d2c4c56364d60b48ee8fc
 - name: k8s.io/kube-openapi
   version: abfc5fbe1cf87ee697db107fdfd24c32fe4397a8
   subpackages:
