@@ -14,6 +14,7 @@ import (
 
 	"github.com/openshift/kubernetes-namespace-reservation/pkg/genericadmissionserver/apiserver"
 	"github.com/openshift/kubernetes-namespace-reservation/pkg/genericadmissionserver/cmd/server"
+	"k8s.io/client-go/rest"
 )
 
 // AdmissionHook is what callers provide.  We define it here to limit how much of the import tree
@@ -27,7 +28,7 @@ type AdmissionHook interface {
 	Admit(admissionSpec admissionv1alpha1.AdmissionReviewSpec) admissionv1alpha1.AdmissionReviewStatus
 
 	// Initialize is called as a post-start hook
-	Initialize(context genericapiserver.PostStartHookContext) error
+	Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error
 }
 
 func RunAdmission(admissionHooks ...AdmissionHook) {

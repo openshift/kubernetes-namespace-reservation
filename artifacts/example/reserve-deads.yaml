@@ -1,0 +1,4 @@
+apiVersion: online.openshift.io/v1alpha1
+kind: NamespaceReservation
+metadata:
+  name: deads

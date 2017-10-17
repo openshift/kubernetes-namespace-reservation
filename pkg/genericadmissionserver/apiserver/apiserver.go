@@ -30,6 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	restclient "k8s.io/client-go/rest"
 )
 
 var (
@@ -45,7 +46,7 @@ type AdmissionHook interface {
 	Admit(admissionSpec admissionv1alpha1.AdmissionReviewSpec) admissionv1alpha1.AdmissionReviewStatus
 
 	// Initialize is called as a post-start hook
-	Initialize(context genericapiserver.PostStartHookContext) error
+	Initialize(kubeClientConfig *restclient.Config, stopCh <-chan struct{}) error
 }
 
 func init() {
@@ -116,6 +117,11 @@ func (c completedConfig) New() (*NamespaceReservationServer, error) {
 		GenericAPIServer: genericServer,
 	}
 
+	inClusterConfig, err := restclient.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	for _, versionMap := range admissionHooksByGroupThenVersion(c.ExtraConfig.AdmissionHooks...) {
 		accessor := meta.NewAccessor()
 		versionInterfaces := &meta.VersionInterfaces{
@@ -172,13 +178,16 @@ func (c completedConfig) New() (*NamespaceReservationServer, error) {
 
 				admissionReview := admissionreview.NewREST(admissionHook.Admit)
 				v1alpha1storage := map[string]rest.Storage{
-					"namespacereservations": admissionReview,
+					admissionResource.Resource: admissionReview,
 				}
 				apiGroupInfo.VersionedResourcesStorageMap[admissionVersion.Version] = v1alpha1storage
 
 				s.GenericAPIServer.AddPostStartHookOrDie(
 					fmt.Sprintf("%s.%s.%s-init", admissionResource.Resource, admissionResource.Version, admissionResource.Group),
-					admissionHook.Initialize)
+					func(context genericapiserver.PostStartHookContext) error {
+						return admissionHook.Initialize(inClusterConfig, context.StopCh)
+					},
+				)
 			}
 		}
 
