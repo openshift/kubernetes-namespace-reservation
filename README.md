@@ -7,6 +7,6 @@ An admission webhook that prevents the creation of specified namespaces
 3. `make build-image`
 4. `oc create namespace openshift-namespace-reservation`
 5. `oc process -f artifacts/install/rbac-template.yaml | oc auth reconcile -f -`
-6. ```oc process -f artifacts/install/apiserver-template.yaml -p "SERVICE_SERVING_CERT_CA=`cat '/tmp/foo/master/service-signer.crt' | base64``" | oc apply -f -```
+6. ```oc process -f artifacts/install/apiserver-template.yaml -p "SERVICE_SERVING_CERT_CA=`cat '/tmp/foo/master/service-signer.crt' | base64`" | oc apply -f -```
 7. `oc create -f  artifacts/example/reserve-deads.yaml` will reserve the `deads` namespace.
 8. `oc new-project deads` should produce "Error from server (Forbidden): "deads" is reserved"
