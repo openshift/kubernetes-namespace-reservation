@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: List
+items:
+
+# to delegate authentication and authorization
+- apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: ClusterRoleBinding
+  metadata:
+    name: auth-delegator-openshift-namespace-reservation
+  roleRef:
+    kind: ClusterRole
+    name: system:auth-delegator
+  subjects:
+  - kind: ServiceAccount
+    namespace: openshift-namespace-reservation
+    name: server
+
+# to let the admission server read the namespace reservations
+- apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: ClusterRole
+  metadata:
+    annotations:
+    name: system:openshift:online:namespace-reservation-server
+  rules:
+  - apiGroups:
+    - online.openshift.io
+    resources:
+    - namespacereservations
+    verbs:
+    - get
+    - list
+    - watch
+
+# to let the admission server read the namespace reservations
+- apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: ClusterRoleBinding
+  metadata:
+    name: namespace-reservation-server-openshift-namespace-reservation
+  roleRef:
+    kind: ClusterRole
+    name: system:openshift:online:namespace-reservation-server
+  subjects:
+  - kind: ServiceAccount
+    namespace: openshift-namespace-reservation
+    name: server
+
+# to read the config for terminating authentication
+- apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: RoleBinding
+  metadata:
+    namespace: kube-system
+    name: extension-server-authentication-reader-openshift-namespace-reservation
+  roleRef:
+    kind: Role
+    name: extension-apiserver-authentication-reader
+  subjects:
+  - kind: ServiceAccount
+    namespace: openshift-namespace-reservation
+    name: server
+
