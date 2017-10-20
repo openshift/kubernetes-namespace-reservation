@@ -1,5 +1,5 @@
 hash: f686326d982f5aaceb2fd784da4b0f858bfbb708431380572f942a65aa7e01d2
-updated: 2017-10-17T15:58:28.511321351-04:00
+updated: 2017-10-20T11:25:01.219634853-04:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -171,7 +171,7 @@ imports:
 - name: github.com/NYTimes/gziphandler
   version: 56545f4a5d46df9a6648819d1664c3a03a13ffdb
 - name: github.com/openshift/generic-admission-server
-  version: f5a8b25f1facd398a01e57bae218355704caea45
+  version: fd03bcc5521f1a93d68cd839c093807ed50a1482
   subpackages:
   - pkg/apiserver
   - pkg/cmd
@@ -208,7 +208,7 @@ imports:
 - name: github.com/spf13/cobra
   version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - name: github.com/spf13/pflag
-  version: 1f33b80956cde38911d1f23d764deb8d77a649ce
+  version: 97afa5e7ca8a08a383cb259e06636b5e2cc7897f
 - name: github.com/ugorji/go
   version: ded73eae5db7e7a0ef6f55aace87a2873c5d2b74
   subpackages:
@@ -546,7 +546,7 @@ imports:
   - util/homedir
   - util/integer
 - name: k8s.io/kube-openapi
-  version: abfc5fbe1cf87ee697db107fdfd24c32fe4397a8
+  version: 89ae48fe8691077463af5b7fb3b6f194632c5946
   subpackages:
   - pkg/builder
   - pkg/common
