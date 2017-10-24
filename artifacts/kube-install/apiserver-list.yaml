@@ -26,14 +26,35 @@ items:
           - "/usr/bin/namespace-reservation-server"
           - "--secure-port=8443"
           - "--audit-log-path=-"
-          - "--v=1"
+          - "--tls-cert-file=/var/serving-cert/tls.crt"
+          - "--tls-private-key-file=/var/serving-cert/tls.key"
+          - "--v=8"
           ports:
           - containerPort: 8443
+          volumeMounts:
+          - mountPath: /var/serving-cert
+            name: serving-cert
           readinessProbe:
             httpGet:
               path: /healthz
               port: 8443
               scheme: HTTPS
+        volumes:
+        - name: serving-cert
+          secret:
+            defaultMode: 420
+            secretName: server-serving-cert
+
+# kube lacks the service serving cert signer, so provide a manual secret for it
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    namespace: openshift-namespace-reservation
+    name: server-serving-cert
+  type: kubernetes.io/tls
+  data:
+    tls.crt: TLS_SERVING_CERT
+    tls.key: TLS_SERVING_KEY
 
 # to be able to assign powers to the process
 - apiVersion: v1
@@ -78,13 +99,13 @@ items:
       # kind is normally the CamelCased singular type. Your resource manifests use this.
       kind: NamespaceReservation
 
-# register to intercept projectrequest creates
+# register as aggregated apiserver
 - apiVersion: apiregistration.k8s.io/v1beta1
   kind: APIService
   metadata:
     name: v1alpha1.admission.online.openshift.io
   spec:
-    insecureSkipTLSVerify: true
+    caBundle: SERVICE_SERVING_CERT_CA
     group: admission.online.openshift.io
     groupPriorityMinimum: 1000
     versionPriority: 15
@@ -92,3 +113,35 @@ items:
       name: server
       namespace: openshift-namespace-reservation
     version: v1alpha1
+
+# register to intercept namespace creates
+- apiVersion: admissionregistration.k8s.io/v1alpha1
+  kind: ExternalAdmissionHookConfiguration
+  metadata:
+    name: namespacereservations.admission.online.openshift.io
+  externalAdmissionHooks:
+  - name: namespacereservations.admission.online.openshift.io
+    clientConfig:
+      service:
+        namespace: default
+        name: kubernetes
+      urlPath: /apis/admission.online.openshift.io/v1alpha1/namespacereservations
+      caBundle: KUBE_CA
+    rules:
+    - operations:
+      - CREATE
+      apiGroups:
+      - project.openshift.io
+      apiVersions:
+      - "*"
+      resources:
+      - projectrequests
+    - operations:
+      - CREATE
+      apiGroups:
+      - ""
+      apiVersions:
+      - "*"
+      resources:
+      - namespaces
+    failurePolicy: Fail

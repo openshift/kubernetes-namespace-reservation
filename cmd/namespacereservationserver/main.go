@@ -40,10 +40,9 @@ func (a *admissionHook) Resource() (plural schema.GroupVersionResource, singular
 func (a *admissionHook) Admit(admissionSpec admissionv1alpha1.AdmissionReviewSpec) admissionv1alpha1.AdmissionReviewStatus {
 	status := admissionv1alpha1.AdmissionReviewStatus{}
 
-	if admissionSpec.Resource.Group != "project.openshift.io" ||
-		admissionSpec.Resource.Resource != "projectrequests" ||
-		len(admissionSpec.SubResource) != 0 ||
-		admissionSpec.Operation != admissionv1alpha1.Create {
+	if admissionSpec.Operation != admissionv1alpha1.Create || len(admissionSpec.SubResource) != 0 ||
+		((admissionSpec.Resource.Group != "project.openshift.io" || admissionSpec.Resource.Resource != "projectrequests") &&
+			(admissionSpec.Resource.Group != "" || admissionSpec.Resource.Resource != "namespaces")) {
 
 		status.Allowed = true
 		return status

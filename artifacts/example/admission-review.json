@@ -1,0 +1,20 @@
+{
+  "apiVersion": "admission.k8s.io/v1alpha1",
+  "kind": "AdmissionReview",
+  "spec": {
+    "kind": {
+      "group": "",
+      "version": "v1",
+      "kind": "Namespace"
+    },
+    "resource": {
+      "group": "",
+      "version": "v1",
+      "resource": "namespaces"
+    },
+    "operation": "CREATE",
+    "object": {
+      "name": "deads"
+    }
+  }
+}
