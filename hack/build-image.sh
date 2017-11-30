@@ -10,5 +10,5 @@ trap cleanup EXIT
 
 pushd "${PROJECT_ROOT}"
 cp -v _output/bin/namespace-reservation-server ./artifacts/simple-image/namespace-reservation-server
-docker build -t namespace-reservation-server:latest ./artifacts/simple-image
+docker build -t ${REPO:-namespace-reservation-server}:latest ./artifacts/simple-image
 popd
