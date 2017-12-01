@@ -1,8 +1,7 @@
 package: github.com/openshift/kubernetes-namespace-reservation
 import:
 - package: github.com/openshift/generic-admission-server/pkg/cmd
-  version: sttts-v1beta1
-  repo: git@github.com:sttts/generic-admission-server.git
+  branch: master
 - package: k8s.io/code-generator
   repo: git@github.com:kubernetes-nightly/code-generator.git
 - package: k8s.io/client-go
