@@ -1,0 +1,150 @@
+apiVersion: v1
+kind: List
+items:
+
+# to create the namespace-reservation-server
+- apiVersion: apps/v1
+  kind: DaemonSet
+  metadata:
+    namespace: openshift-namespace-reservation
+    name: server
+    labels:
+      server: "true"
+  spec:
+    selector:
+      matchLabels:
+        server: "true"
+    template:
+      metadata:
+        name: server
+        labels:
+          server: "true"
+      spec:
+        serviceAccountName: server
+        containers:
+        - name: c
+          image: your-docker-user-name/namespace-reservation-server:latest
+          imagePullPolicy: IfNotPresent
+          command:
+          - "/usr/bin/namespace-reservation-server"
+          - "--secure-port=8443"
+          - "--audit-log-path=-"
+          - "--tls-cert-file=/var/serving-cert/tls.crt"
+          - "--tls-private-key-file=/var/serving-cert/tls.key"
+          - "--v=8"
+          ports:
+          - containerPort: 8443
+          volumeMounts:
+          - mountPath: /var/serving-cert
+            name: serving-cert
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8443
+              scheme: HTTPS
+        volumes:
+        - name: serving-cert
+          secret:
+            defaultMode: 420
+            secretName: server-serving-cert
+
+# kube lacks the service serving cert signer, so provide a manual secret for it
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    namespace: openshift-namespace-reservation
+    name: server-serving-cert
+  type: kubernetes.io/tls
+  data:
+    tls.crt: TLS_SERVING_CERT
+    tls.key: TLS_SERVING_KEY
+
+# to be able to assign powers to the process
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    namespace: openshift-namespace-reservation
+    name: server
+
+# to be able to expose TSB inside the cluster
+- apiVersion: v1
+  kind: Service
+  metadata:
+    namespace: openshift-namespace-reservation
+    name: server
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: server-serving-cert
+  spec:
+    selector:
+      server: "true"
+    ports:
+    - port: 443
+      targetPort: 8443
+
+# to create the custom resource
+- apiVersion: apiextensions.k8s.io/v1beta1
+  kind: CustomResourceDefinition
+  metadata:
+    # name must match the spec fields below, and be in the form: <plural>.<group>
+    name: namespacereservations.online.openshift.io
+  spec:
+    # group name to use for REST API: /apis/<group>/<version>
+    group: online.openshift.io
+    # version name to use for REST API: /apis/<group>/<version>
+    version: v1alpha1
+    # either Namespaced or Cluster
+    scope: Cluster
+    names:
+      # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+      plural: namespacereservations
+      # singular name to be used as an alias on the CLI and for display
+      singular: namespacereservation
+      # kind is normally the CamelCased singular type. Your resource manifests use this.
+      kind: NamespaceReservation
+
+# register as aggregated apiserver
+- apiVersion: apiregistration.k8s.io/v1beta1
+  kind: APIService
+  metadata:
+    name: v1beta1.admission.online.openshift.io
+  spec:
+    caBundle: SERVICE_SERVING_CERT_CA
+    group: admission.online.openshift.io
+    groupPriorityMinimum: 1000
+    versionPriority: 15
+    service:
+      name: server
+      namespace: openshift-namespace-reservation
+    version: v1beta1
+
+# register to intercept namespace creates
+- apiVersion: admissionregistration.k8s.io/v1beta1
+  kind: ValidatingWebhookConfiguration
+  metadata:
+    name: namespacereservations.admission.online.openshift.io
+  webhooks:
+  - name: namespacereservations.admission.online.openshift.io
+    clientConfig:
+      service:
+        namespace: default
+        name: kubernetes
+        path: /apis/admission.online.openshift.io/v1beta1/namespacereservations
+      caBundle: KUBE_CA
+    rules:
+    - operations:
+      - CREATE
+      apiGroups:
+      - project.openshift.io
+      apiVersions:
+      - "*"
+      resources:
+      - projectrequests
+    - operations:
+      - CREATE
+      apiGroups:
+      - ""
+      apiVersions:
+      - "*"
+      resources:
+      - namespaces
+    failurePolicy: Fail

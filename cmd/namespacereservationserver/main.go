@@ -4,15 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 
-	admissionv1alpha1 "k8s.io/api/admission/v1alpha1"
+	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
-
-	"sync"
 
 	"github.com/openshift/generic-admission-server/pkg/cmd"
 )
@@ -28,19 +27,19 @@ type admissionHook struct {
 	initialized bool
 }
 
-func (a *admissionHook) Resource() (plural schema.GroupVersionResource, singular string) {
+func (a *admissionHook) ValidatingResource() (plural schema.GroupVersionResource, singular string) {
 	return schema.GroupVersionResource{
 			Group:    "admission.online.openshift.io",
-			Version:  "v1alpha1",
+			Version:  "v1beta1",
 			Resource: "namespacereservations",
 		},
 		"namespacereservation"
 }
 
-func (a *admissionHook) Admit(admissionSpec admissionv1alpha1.AdmissionReviewSpec) admissionv1alpha1.AdmissionReviewStatus {
-	status := admissionv1alpha1.AdmissionReviewStatus{}
+func (a *admissionHook) Validate(admissionSpec *admissionv1beta1.AdmissionRequest) *admissionv1beta1.AdmissionResponse {
+	status := &admissionv1beta1.AdmissionResponse{}
 
-	if admissionSpec.Operation != admissionv1alpha1.Create || len(admissionSpec.SubResource) != 0 ||
+	if admissionSpec.Operation != admissionv1beta1.Create || len(admissionSpec.SubResource) != 0 ||
 		((admissionSpec.Resource.Group != "project.openshift.io" || admissionSpec.Resource.Resource != "projectrequests") &&
 			(admissionSpec.Resource.Group != "" || admissionSpec.Resource.Resource != "namespaces")) {
 

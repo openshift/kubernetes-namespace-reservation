@@ -44,17 +44,21 @@ function kube::util::create_serving_certkey {
 EOF
 }
 
+which jq &>/dev/null || { echo "Please install jq (https://stedolan.github.io/jq/)."; exit 1; }
+
 CERT_DIR=_output/tmp/certs
 mkdir -p "${CERT_DIR}"
 
 kube::util::create_signing_certkey "" "${CERT_DIR}" serving '"server auth"'
 kube::util::create_serving_certkey "" "${CERT_DIR}" "serving-ca" server.openshift-namespace-reservation.svc "server.openshift-namespace-reservation.svc" "server.openshift-namespace-reservation.svc"
 
-kubectl create ns openshift-namespace-reservation || true
+kubectl delete daemonset -n openshift-namespace-reservation server &>/dev/null || true
+kubectl create ns openshift-namespace-reservation &>/dev/null || true
 kubectl auth reconcile -f artifacts/kube-install/rbac-list.yaml
-cat artifacts/kube-install/apiserver-list.yaml | \
-sed "s/TLS_SERVING_CERT/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.crt -w0)/g" - | \
-sed "s/TLS_SERVING_KEY/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.key -w0)/g" - | \
-sed "s/SERVICE_SERVING_CERT_CA/$(base64 ${CERT_DIR}/serving-ca.crt -w0)/g" - | \
-sed "s/KUBE_CA/$(base64 /var/run/kubernetes/server-ca.crt -w0)/g" - | \
+KUBE_CA=$(kubectl config view --minify=true --flatten -o json | jq '.clusters[0].cluster."certificate-authority-data"' -r)
+cat artifacts/kube-install/apiserver-list.yaml.template | \
+sed "s/TLS_SERVING_CERT/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.crt | tr -d '\n')/g" - | \
+sed "s/TLS_SERVING_KEY/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.key | tr -d '\n')/g" - | \
+sed "s/SERVICE_SERVING_CERT_CA/$(base64 ${CERT_DIR}/serving-ca.crt | tr -d '\n')/g" - | \
+sed "s/KUBE_CA/${KUBE_CA}/g" - | \
 kubectl apply -f -
