@@ -1,26 +1,19 @@
-apiVersion: template.openshift.io/v1
-kind: Template
-metadata:
-  name: namespace-reservation-server
-parameters:
-- name: IMAGE
-  value: namespace-reservation-server:latest
-- name: NAMESPACE
-  value: openshift-namespace-reservation
-- name: SERVICE_SERVING_CERT_CA
-- name: LOGLEVEL
-  value: "0"
-objects:
+apiVersion: v1
+kind: List
+items:
 
 # to create the namespace-reservation-server
-- apiVersion: extensions/v1beta1
+- apiVersion: apps/v1
   kind: DaemonSet
   metadata:
-    namespace: ${NAMESPACE}
+    namespace: openshift-namespace-reservation
     name: server
     labels:
       server: "true"
   spec:
+    selector:
+      matchLabels:
+        server: "true"
     template:
       metadata:
         name: server
@@ -30,7 +23,7 @@ objects:
         serviceAccountName: server
         containers:
         - name: c
-          image: ${IMAGE}
+          image: your-docker-user-name/namespace-reservation-server:latest
           imagePullPolicy: IfNotPresent
           command:
           - "/usr/bin/namespace-reservation-server"
@@ -38,7 +31,7 @@ objects:
           - "--audit-log-path=-"
           - "--tls-cert-file=/var/serving-cert/tls.crt"
           - "--tls-private-key-file=/var/serving-cert/tls.key"
-          - "--v=${LOGLEVEL}"
+          - "--v=8"
           ports:
           - containerPort: 8443
           volumeMounts:
@@ -55,18 +48,29 @@ objects:
             defaultMode: 420
             secretName: server-serving-cert
 
+# kube lacks the service serving cert signer, so provide a manual secret for it
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    namespace: openshift-namespace-reservation
+    name: server-serving-cert
+  type: kubernetes.io/tls
+  data:
+    tls.crt: TLS_SERVING_CERT
+    tls.key: TLS_SERVING_KEY
+
 # to be able to assign powers to the process
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
-    namespace: ${NAMESPACE}
+    namespace: openshift-namespace-reservation
     name: server
 
 # to be able to expose TSB inside the cluster
 - apiVersion: v1
   kind: Service
   metadata:
-    namespace: ${NAMESPACE}
+    namespace: openshift-namespace-reservation
     name: server
     annotations:
       service.alpha.openshift.io/serving-cert-secret-name: server-serving-cert
@@ -98,18 +102,34 @@ objects:
       # kind is normally the CamelCased singular type. Your resource manifests use this.
       kind: NamespaceReservation
 
-# register to intercept projectrequest creates
-- apiVersion: admissionregistration.k8s.io/v1alpha1
-  kind: ExternalAdmissionHookConfiguration
+# register as aggregated apiserver
+- apiVersion: apiregistration.k8s.io/v1beta1
+  kind: APIService
+  metadata:
+    name: v1beta1.admission.online.openshift.io
+  spec:
+    caBundle: SERVICE_SERVING_CERT_CA
+    group: admission.online.openshift.io
+    groupPriorityMinimum: 1000
+    versionPriority: 15
+    service:
+      name: server
+      namespace: openshift-namespace-reservation
+    version: v1beta1
+
+# register to intercept namespace creates
+- apiVersion: admissionregistration.k8s.io/v1beta1
+  kind: ValidatingWebhookConfiguration
   metadata:
     name: namespacereservations.admission.online.openshift.io
-  externalAdmissionHooks:
-  - name: namespacereservations.admission.online.openshift.io/apis/admission.online.openshift.io/v1alpha1/namespacereservations
+  webhooks:
+  - name: namespacereservations.admission.online.openshift.io
     clientConfig:
       service:
-        namespace: ${NAMESPACE}
-        name: server
-      caBundle: ${SERVICE_SERVING_CERT_CA}
+        namespace: default
+        name: kubernetes
+        path: /apis/admission.online.openshift.io/v1beta1/namespacereservations
+      caBundle: KUBE_CA
     rules:
     - operations:
       - CREATE
@@ -119,4 +139,12 @@ objects:
       - "*"
       resources:
       - projectrequests
+    - operations:
+      - CREATE
+      apiGroups:
+      - ""
+      apiVersions:
+      - "*"
+      resources:
+      - namespaces
     failurePolicy: Fail
