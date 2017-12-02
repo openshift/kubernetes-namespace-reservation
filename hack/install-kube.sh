@@ -46,19 +46,26 @@ EOF
 
 which jq &>/dev/null || { echo "Please install jq (https://stedolan.github.io/jq/)."; exit 1; }
 
+# create necessary TLS certificates:
+# - a local CA key and cert
+# - a webhook server key and cert signed by the local CA
 CERT_DIR=_output/tmp/certs
 mkdir -p "${CERT_DIR}"
-
 kube::util::create_signing_certkey "" "${CERT_DIR}" serving '"server auth"'
+
+# create webhook server key and cert
 kube::util::create_serving_certkey "" "${CERT_DIR}" "serving-ca" server.openshift-namespace-reservation.svc "server.openshift-namespace-reservation.svc" "server.openshift-namespace-reservation.svc"
 
-kubectl delete daemonset -n openshift-namespace-reservation server &>/dev/null || true
-kubectl create ns openshift-namespace-reservation &>/dev/null || true
+# install RBAC rules
 kubectl auth reconcile -f artifacts/kube-install/rbac-list.yaml
+
+# deploy the webhook as a daemonset (preferably restricted to the master nodes)
+kubectl create ns openshift-namespace-reservation &>/dev/null || true
+kubectl delete daemonset -n openshift-namespace-reservation server &>/dev/null || true
 KUBE_CA=$(kubectl config view --minify=true --flatten -o json | jq '.clusters[0].cluster."certificate-authority-data"' -r)
 cat artifacts/kube-install/apiserver-list.yaml.template | \
-sed "s/TLS_SERVING_CERT/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.crt | tr -d '\n')/g" - | \
-sed "s/TLS_SERVING_KEY/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.key | tr -d '\n')/g" - | \
-sed "s/SERVICE_SERVING_CERT_CA/$(base64 ${CERT_DIR}/serving-ca.crt | tr -d '\n')/g" - | \
-sed "s/KUBE_CA/${KUBE_CA}/g" - | \
-kubectl apply -f -
+    sed "s/TLS_SERVING_CERT/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.crt | tr -d '\n')/g" - | \
+    sed "s/TLS_SERVING_KEY/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.key | tr -d '\n')/g" - | \
+    sed "s/SERVICE_SERVING_CERT_CA/$(base64 ${CERT_DIR}/serving-ca.crt | tr -d '\n')/g" - | \
+    sed "s/KUBE_CA/${KUBE_CA}/g" - | \
+    kubectl apply -f -
