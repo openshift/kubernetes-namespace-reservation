@@ -67,8 +67,8 @@ kubectl create ns openshift-namespace-reservation &>/dev/null || true
 kubectl delete daemonset -n openshift-namespace-reservation server &>/dev/null || true
 KUBE_CA=$(kubectl config view --minify=true --flatten -o json | jq '.clusters[0].cluster."certificate-authority-data"' -r)
 cat artifacts/kube-install/apiserver-list.yaml.template | \
-    sed "s/TLS_SERVING_CERT/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.crt | tr -d '\n')/g" - | \
-    sed "s/TLS_SERVING_KEY/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.key | tr -d '\n')/g" - | \
-    sed "s/SERVICE_SERVING_CERT_CA/$(base64 ${CERT_DIR}/serving-ca.crt | tr -d '\n')/g" - | \
-    sed "s/KUBE_CA/${KUBE_CA}/g" - | \
+    sed "s/TLS_SERVING_CERT/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.crt | tr -d '\n')/g" | \
+    sed "s/TLS_SERVING_KEY/$(base64 ${CERT_DIR}/serving-server.openshift-namespace-reservation.svc.key | tr -d '\n')/g" | \
+    sed "s/SERVICE_SERVING_CERT_CA/$(base64 ${CERT_DIR}/serving-ca.crt | tr -d '\n')/g" | \
+    sed "s/KUBE_CA/${KUBE_CA}/g" | \
     kubectl apply -f -
