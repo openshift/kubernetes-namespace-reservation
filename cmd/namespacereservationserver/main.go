@@ -131,5 +131,9 @@ func (a *admissionHook) Initialize(kubeClientConfig *rest.Config, stopCh <-chan 
 }
 
 type NamedThing struct {
-	Name string `json:name`
+	ObjectMeta `json:"metadata"`
+}
+
+type ObjectMeta struct {
+	Name string `json:"name"`
 }
