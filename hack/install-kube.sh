@@ -45,6 +45,7 @@ EOF
 }
 
 which jq &>/dev/null || { echo "Please install jq (https://stedolan.github.io/jq/)."; exit 1; }
+which cfssljson &>/dev/null || { echo "Please install cfssljson (https://github.com/cloudflare/cfssl))."; exit 1; }
 
 # create necessary TLS certificates:
 # - a local CA key and cert
