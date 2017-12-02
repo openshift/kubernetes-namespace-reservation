@@ -1,5 +1,5 @@
 hash: 2843700ea1896157983e2f52d30249a021dd5e2ada6bbfb80c0897f834876a9b
-updated: 2017-12-01T19:47:07.774974809+01:00
+updated: 2017-12-02T10:03:06.267990601+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -108,7 +108,7 @@ imports:
   - proto
   - sortkeys
 - name: github.com/golang/glog
-  version: 44145f04b68cf362d9c4df2182967c2275eaefed
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
   version: 1643683e1b54a9e88ad26d98f81400c8c9d9f4f9
   subpackages:
@@ -172,7 +172,7 @@ imports:
 - name: github.com/NYTimes/gziphandler
   version: 56545f4a5d46df9a6648819d1664c3a03a13ffdb
 - name: github.com/openshift/generic-admission-server
-  version: 4b3b41358411892e9bb32dec704d7c091c2ed71b
+  version: 6e84151dda6754bfd47b41a9cc8d6945cd3b2007
   subpackages:
   - pkg/apiserver
   - pkg/cmd
@@ -205,7 +205,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/cobra
-  version: 1be1d2841c773c01bee8289f55f7463b6e2c2539
+  version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.com/ugorji/go
@@ -275,7 +275,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
-  version: 41c0f68464e3bcdd63901fef7476daca2333a00b
+  version: 6691ce6d75e9994e3f60be989b82b10ad27e2869
   repo: git@github.com:kubernetes-nightly/api.git
   subpackages:
   - admission/v1beta1
