@@ -7,7 +7,8 @@ build:
 	go build -o _output/bin/namespace-reservation-server github.com/openshift/kubernetes-namespace-reservation/cmd/namespacereservationserver
 .PHONY: build
 
-build-image: build
+build-image:
+	GOOS=linux go build -o _output/bin/namespace-reservation-server github.com/openshift/kubernetes-namespace-reservation/cmd/namespacereservationserver
 	REPO=$(REPO) hack/build-image.sh
 .PHONY: build-image
 
