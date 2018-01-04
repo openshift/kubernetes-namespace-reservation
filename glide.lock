@@ -1,5 +1,5 @@
-hash: 2843700ea1896157983e2f52d30249a021dd5e2ada6bbfb80c0897f834876a9b
-updated: 2017-12-02T10:03:06.267990601+01:00
+hash: 23f364be47b5689f3843cb64f34562283e1ac87c694ee41d93ca6aa22dc73a78
+updated: 2018-01-04T10:16:10.499284193-05:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -108,7 +108,7 @@ imports:
   - proto
   - sortkeys
 - name: github.com/golang/glog
-  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+  version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/golang/protobuf
   version: 1643683e1b54a9e88ad26d98f81400c8c9d9f4f9
   subpackages:
@@ -172,7 +172,7 @@ imports:
 - name: github.com/NYTimes/gziphandler
   version: 56545f4a5d46df9a6648819d1664c3a03a13ffdb
 - name: github.com/openshift/generic-admission-server
-  version: 6e84151dda6754bfd47b41a9cc8d6945cd3b2007
+  version: 47e4bc00e8892ae078db237fe2c5b4ba1ffc5cf4
   subpackages:
   - pkg/apiserver
   - pkg/cmd
@@ -275,8 +275,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
-  version: 6691ce6d75e9994e3f60be989b82b10ad27e2869
-  repo: git@github.com:kubernetes-nightly/api.git
+  version: af4bc157c3a209798fc897f6d4aaaaeb6c2e0d6a
   subpackages:
   - admission/v1beta1
   - admissionregistration/v1alpha1
@@ -308,8 +307,7 @@ imports:
   - storage/v1alpha1
   - storage/v1beta1
 - name: k8s.io/apimachinery
-  version: f186b87c2880406e66da1e2b2c613dd0426ddb60
-  repo: git@github.com:kubernetes-nightly/apimachinery.git
+  version: 180eddb345a5be3a157cea1c624700ad5bd27b8f
   subpackages:
   - pkg/api/equality
   - pkg/api/errors
@@ -366,8 +364,7 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: af51491622a0ff3a95a299ee3ed4933b6885d02e
-  repo: git@github.com:kubernetes-nightly/apiserver.git
+  version: 91e14f394e4796abf5a994a349a222e7081d86b6
   subpackages:
   - pkg/admission
   - pkg/admission/configuration
@@ -455,8 +452,7 @@ imports:
   - plugin/pkg/authenticator/token/webhook
   - plugin/pkg/authorizer/webhook
 - name: k8s.io/client-go
-  version: 95f378e1ae97d8423ed7e93b3c243d3f474c2c11
-  repo: git@github.com:kubernetes-nightly/client-go.git
+  version: 78700dec6369ba22221b72770783300f143df150
   subpackages:
   - discovery
   - dynamic
@@ -573,8 +569,7 @@ imports:
   - util/homedir
   - util/integer
 - name: k8s.io/code-generator
-  version: 13f841d369cf284f6a14c03e19cc05bb64d1f9d3
-  repo: git@github.com:kubernetes-nightly/code-generator.git
+  version: fef8bcdbaf36ac6a1a18c9ef7d85200b249fad30
 - name: k8s.io/kube-openapi
   version: 39a7bf85c140f972372c2a0d1ee40adbf0c8bfe1
   subpackages:
