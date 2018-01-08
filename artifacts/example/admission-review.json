@@ -1,7 +1,7 @@
 {
   "apiVersion": "admission.k8s.io/v1beta1",
   "kind": "AdmissionReview",
-  "spec": {
+  "request": {
     "kind": {
       "group": "",
       "version": "v1",
@@ -14,7 +14,9 @@
     },
     "operation": "CREATE",
     "object": {
-      "name": "deads"
+      "metadata": {
+        "name": "deads"
+      }
     }
   }
 }
