@@ -1,5 +1,5 @@
 hash: 23f364be47b5689f3843cb64f34562283e1ac87c694ee41d93ca6aa22dc73a78
-updated: 2018-01-04T10:16:10.499284193-05:00
+updated: 2018-01-30T03:45:35.50587837-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -172,7 +172,7 @@ imports:
 - name: github.com/NYTimes/gziphandler
   version: 56545f4a5d46df9a6648819d1664c3a03a13ffdb
 - name: github.com/openshift/generic-admission-server
-  version: 47e4bc00e8892ae078db237fe2c5b4ba1ffc5cf4
+  version: 6cbd9584810e7be9ec4263c5d010a48be6231e60
   subpackages:
   - pkg/apiserver
   - pkg/cmd

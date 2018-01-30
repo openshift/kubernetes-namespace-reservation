@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	cmd.RunAdmission(&admissionHook{})
+	cmd.RunAdmissionServer(&admissionHook{})
 }
 
 type admissionHook struct {
