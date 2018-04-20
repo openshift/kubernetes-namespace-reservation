@@ -30,6 +30,16 @@ API aggregation of kube-apiserver. The group can be reached at `/apis/admission.
 of the kube-apiserver, i.e. via the `kubernetes.default.svc` service hostname inside the
 cluster.
 
+There are numerous advantages to registering the webhook server as an aggregated API:
+
+- allows other kubernetes components to talk to the the admission webhook using the `kubernetes.default.svc` service
+- allows other kubernetes components to use their in-cluster credentials to communicate with the webhook
+- allows you to test the webhook using kubectl
+- allows you to govern access to the webhook using RBAC
+- prevents other extension API servers from leaking their service account tokens to the webhook
+
+For more information, see: https://kubernetes.io/blog/2018/01/extensible-admission-is-beta
+
 The admission webhook is registered via a `ValidatingWebhookConfiguration` object. The webhook URL used
 for admission requests is https://kubernetes.default.svc/apis/admission.online.openshift.io/v1beta1/namespacereservations,
 i.e. the kube-apiserver sends admission requests to itself. They are forwarded by the aggregator proxy code
