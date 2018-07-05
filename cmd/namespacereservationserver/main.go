@@ -111,21 +111,16 @@ func (a *admissionHook) Initialize(kubeClientConfig *rest.Config, stopCh <-chan 
 		Version: "v1alpha1",
 	}
 	shallowClientConfigCopy.APIPath = "/apis"
-	dynamicClient, err := dynamic.NewClient(&shallowClientConfigCopy)
+	dynamicClient, err := dynamic.NewForConfig(&shallowClientConfigCopy)
 	if err != nil {
 		return err
 	}
-	a.reservationClient = dynamicClient.Resource(
-		&metav1.APIResource{
-			Name:       "namespacereservations",
-			Namespaced: false,
-			Group:      "online.openshift.io",
-			Version:    "v1alpha1",
-			// kind is the kind for the resource (e.g. 'Foo' is the kind for a resource 'foo')
-			Kind: "NamespaceReservation",
-		},
-		"",
-	)
+	a.reservationClient = dynamicClient.Resource(schema.GroupVersionResource{
+		Group:      "online.openshift.io",
+		Version:    "v1alpha1",
+		// kind is the kind for the resource (e.g. 'Foo' is the kind for a resource 'foo')
+		Resource: "namespacereservations",
+	})
 
 	return nil
 }
